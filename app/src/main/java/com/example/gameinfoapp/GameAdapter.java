@@ -36,9 +36,15 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull GameViewHolder holder, int position) {
-        Game game = gameList.get(position);
+        if (gameList.isEmpty()) {
+            holder.gameTitleTextView.setText("No games available");
+            holder.gameRatingTextView.setText("");
+            holder.gameReleasedTextView.setText("");
+            holder.gameIconImageView.setImageResource(R.drawable.ic_launcher_background); // Placeholder image
+            return;
+        }
 
-        // Bind game details
+        Game game = gameList.get(position);
         holder.gameTitleTextView.setText(game.getName());
         holder.gameRatingTextView.setText("Rating: " + game.getRating() + "⭐");
         holder.gameReleasedTextView.setText("Release Date: " + game.getReleased());
@@ -47,9 +53,9 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder
                 .placeholder(R.drawable.ic_launcher_background)
                 .into(holder.gameIconImageView);
 
-        // Handle click event
         holder.itemView.setOnClickListener(v -> listener.onGameClick(game.getId()));
     }
+
 
     @Override
     public int getItemCount() {

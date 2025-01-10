@@ -5,8 +5,12 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.SearchView;
+import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -34,14 +38,17 @@ public class MainFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private SearchView searchView;
-    private Button filterButton;
+    private String currentQuery = null; // Current search query
+    private String currentOrdering = null; // Current ordering
     private GameAdapter adapter;
+
     private List<Game> gameList = new ArrayList<>();
-    private final String API_KEY = "80d338883fdf4b43a0ae4829f21e0863"; // Replace with your RAWG API key
+    private final String API_KEY = "80d338883fdf4b43a0ae4829f21e0863";
+    private final int PAGE_SIZE = 40;
     private SwitchCompat switchMode;
 
-    private int currentPage = 1; // Start from the first page
-    private boolean isLoading = false; // Prevent multiple simultaneous API calls
+    private int currentPage = 1;
+    private boolean isLoading = false;
 
     @Nullable
     @Override
@@ -51,53 +58,60 @@ public class MainFragment extends Fragment {
         // Initialize views
         recyclerView = view.findViewById(R.id.recycler_view);
         searchView = view.findViewById(R.id.search_view);
-        filterButton = view.findViewById(R.id.btn_filter);
         switchMode = view.findViewById(R.id.switchMode);
+        ImageView filterButton = view.findViewById(R.id.btn_filter);
+
+        Spinner sortSpinner = view.findViewById(R.id.spinner_sort);
+        setupSortSpinner(sortSpinner);
 
         // Setup RecyclerView
         setupRecyclerView();
 
-        // Fetch games from API
-        fetchGames(null);
+        // Fetch initial games
+        fetchGames(currentQuery, currentOrdering);
 
         // Setup SearchView
         setupSearchView();
 
         // Setup Dark Mode Toggle
-        setupDarkModeToggle();
+        setupDarkModeToggle(filterButton);
+
+        // Navigate to Filter Screen
+        filterButton.setOnClickListener(v -> {
+            NavController navController = Navigation.findNavController(view);
+            navController.navigate(R.id.action_main_to_filter);
+        });
 
         return view;
     }
 
-    private void setupDarkModeToggle() {
+    private void setupDarkModeToggle(ImageView filterButton) {
         SharedPreferences preferences = requireContext().getSharedPreferences("settings", 0);
         boolean isDarkMode = preferences.getBoolean("dark_mode", false);
 
-        // Set initial state
+        // Set initial states
         switchMode.setChecked(isDarkMode);
         AppCompatDelegate.setDefaultNightMode(isDarkMode ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
+        filterButton.setImageResource(isDarkMode ? R.drawable.dark_ic_filter : R.drawable.ic_filter);
 
-        // Handle toggle click
+        // Handle Dark Mode Toggle
         switchMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            // Save the new mode in preferences
             preferences.edit().putBoolean("dark_mode", isChecked).apply();
-
-            // Set the theme
             AppCompatDelegate.setDefaultNightMode(isChecked ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
 
-            // Add thumb animation
+            // Update the filter button image
+            filterButton.setImageResource(isChecked ? R.drawable.dark_ic_filter : R.drawable.ic_filter);
+
+            // Optional: Add thumb animation
             animateThumb(buttonView, isChecked);
         });
     }
-
-
 
     private void setupRecyclerView() {
         adapter = new GameAdapter(gameList, this::navigateToDetail);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
 
-        // Add the endless scroll listener
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
@@ -109,10 +123,8 @@ public class MainFragment extends Fragment {
                     int totalItemCount = layoutManager.getItemCount();
                     int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
 
-                    // Check if we've reached the end of the list
                     if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount
                             && firstVisibleItemPosition >= 0) {
-                        // Load more games
                         loadMoreGames();
                     }
                 }
@@ -120,72 +132,214 @@ public class MainFragment extends Fragment {
         });
     }
 
-    private void loadMoreGames() {
-        isLoading = true; // Prevent multiple simultaneous API calls
-        currentPage++; // Increment the page number
 
-        Retrofit retrofit = RetrofitClient.getRetrofitInstance();
-        GameApi gameApi = retrofit.create(GameApi.class);
+    private void applyLocalSorting(List<Game> games, String ordering) {
+        if (ordering == null) return;
 
-        Call<GameResponse> call = gameApi.getGames(API_KEY, null, currentPage, 40); // Next page with 40 results
-        call.enqueue(new Callback<GameResponse>() {
-            @Override
-            public void onResponse(Call<GameResponse> call, Response<GameResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    gameList.addAll(response.body().getResults()); // Append new games
-                    adapter.notifyDataSetChanged();
+        games.sort((game1, game2) -> {
+            try {
+                switch (ordering) {
+                    case "-rating":
+                        return Double.compare(game2.getRating(), game1.getRating());
+                    case "rating":
+                        return Double.compare(game1.getRating(), game2.getRating());
+                    case "-released":
+                        return game2.getReleased().compareTo(game1.getReleased());
+                    case "released":
+                        return game1.getReleased().compareTo(game2.getReleased());
+                    default:
+                        return 0;
                 }
-                isLoading = false; // Allow further API calls
-            }
-
-            @Override
-            public void onFailure(Call<GameResponse> call, Throwable t) {
-                // Handle errors
-                isLoading = false; // Allow further API calls
+            } catch (Exception e) {
+                System.out.println("DEBUG: Error during sorting: " + e.getMessage());
+                return 0;
             }
         });
     }
+
+
+
+    private void setupSortSpinner(Spinner spinner) {
+        String[] sortOptions = {
+                "Default",
+                "Rating - High to Low",
+                "Rating - Low to High",
+                "Released - High to Low",
+                "Released - Low to High"
+        };
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_spinner_item, sortOptions);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                switch (position) {
+                    case 0: // Default
+                        currentOrdering = null;
+                        break;
+                    case 1: // Rating - High to Low
+                        currentOrdering = "-rating";
+                        break;
+                    case 2: // Rating - Low to High
+                        currentOrdering = "rating";
+                        break;
+                    case 3: // Released - High to Low
+                        currentOrdering = "-released";
+                        break;
+                    case 4: // Released - Low to High
+                        currentOrdering = "released";
+                        break;
+                }
+
+                // Log the selected sorting option
+                logDebug("Selected sorting: " + sortOptions[position] + " (ordering: " + currentOrdering + ")");
+
+                // Fetch games with updated ordering
+                fetchGames(currentQuery, currentOrdering);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Do nothing
+            }
+        });
+    }
+
+
+
+
+
     private void setupSearchView() {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                fetchGames(query);
+                currentQuery = query;
+                fetchGames(currentQuery, currentOrdering);
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
+                if (newText.isEmpty()) {
+                    currentQuery = null;
+                    fetchGames(currentQuery, currentOrdering);
+                }
                 return false;
             }
         });
     }
 
-    private void fetchGames(String query) {
-        currentPage = 1; // Reset to the first page when performing a new search
+
+    private void logDebug(String message) {
+        System.out.println("DEBUG: " + message);
+    }
+
+    private void logError(String message) {
+        System.err.println("ERROR: " + message);
+    }
+
+
+
+    private List<Game> filterGames(List<Game> games) {
+        List<Game> filteredGames = new ArrayList<>();
+
+        for (Game game : games) {
+            boolean hasValidReleaseDate = game.getReleased() != null && !game.getReleased().isEmpty();
+            boolean hasValidRating = game.getRating() > 0.0;
+
+            if (hasValidReleaseDate && hasValidRating) {
+                filteredGames.add(game);
+            } else {
+                System.out.println("DEBUG: Filtered out game: " + game.getName() + " | Released: " + game.getReleased() + " | Rating: " + game.getRating());
+            }
+        }
+
+        System.out.println("DEBUG: Total games after filtering: " + filteredGames.size());
+        return filteredGames;
+    }
+
+
+    private void fetchGames(String query, String ordering) {
+        currentPage = 1;
         isLoading = true;
 
         Retrofit retrofit = RetrofitClient.getRetrofitInstance();
         GameApi gameApi = retrofit.create(GameApi.class);
 
-        Call<GameResponse> call = gameApi.getGames(API_KEY, query, currentPage, 40); // Fetch first page with 40 results
+        System.out.println("DEBUG: Fetching games with query: " + query + ", ordering: " + ordering);
+
+        Call<GameResponse> call = gameApi.getGames(API_KEY, query, currentPage, PAGE_SIZE, ordering);
         call.enqueue(new Callback<GameResponse>() {
             @Override
             public void onResponse(Call<GameResponse> call, Response<GameResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    gameList.clear(); // Clear the existing list for new data
-                    gameList.addAll(response.body().getResults());
+                    gameList.clear();
+
+                    List<Game> apiResults = response.body().getResults();
+                    System.out.println("DEBUG: API returned " + apiResults.size() + " games.");
+
+                    // Filter and sort the games
+                    List<Game> filteredResults = filterGames(apiResults);
+                    applyLocalSorting(filteredResults, ordering);
+
+                    if (filteredResults.isEmpty()) {
+                        System.out.println("DEBUG: No games available after filtering.");
+                    } else {
+                        gameList.addAll(filteredResults);
+                    }
+
                     adapter.notifyDataSetChanged();
+                } else {
+                    System.out.println("DEBUG: API response unsuccessful or empty.");
                 }
-                isLoading = false; // Allow further API calls
+                isLoading = false;
             }
 
             @Override
             public void onFailure(Call<GameResponse> call, Throwable t) {
-                // Handle errors
+                System.out.println("ERROR: Failed to fetch games: " + t.getMessage());
                 isLoading = false;
             }
         });
     }
+
+
+
+
+
+    private void loadMoreGames() {
+        isLoading = true;
+        currentPage++;
+
+        Retrofit retrofit = RetrofitClient.getRetrofitInstance();
+        GameApi gameApi = retrofit.create(GameApi.class);
+
+        Call<GameResponse> call = gameApi.getGames(API_KEY, currentQuery, currentPage, PAGE_SIZE, currentOrdering);
+        call.enqueue(new Callback<GameResponse>() {
+            @Override
+            public void onResponse(Call<GameResponse> call, Response<GameResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Game> filteredResults = filterGames(response.body().getResults());
+                    gameList.addAll(filteredResults);
+
+                    adapter.notifyDataSetChanged();
+                } else {
+                    logError("API response unsuccessful or empty.");
+                }
+                isLoading = false;
+            }
+
+            @Override
+            public void onFailure(Call<GameResponse> call, Throwable t) {
+                logError("Failed to fetch games: " + t.getMessage());
+                isLoading = false;
+            }
+        });
+    }
+
     private void animateThumb(View switchWidget, boolean isChecked) {
         ObjectAnimator animator = ObjectAnimator.ofPropertyValuesHolder(
                 switchWidget,
@@ -193,7 +347,7 @@ public class MainFragment extends Fragment {
                 PropertyValuesHolder.ofFloat("scaleY", 1f, 1.5f, 1f),
                 PropertyValuesHolder.ofFloat("rotation", 0f, isChecked ? 180f : -180f, 0f)
         );
-        animator.setDuration(400); // Duration in milliseconds
+        animator.setDuration(400);
         animator.setInterpolator(new AccelerateDecelerateInterpolator());
         animator.start();
     }

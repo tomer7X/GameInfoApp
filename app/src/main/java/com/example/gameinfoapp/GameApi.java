@@ -10,8 +10,9 @@ public interface GameApi {
     Call<GameResponse> getGames(
             @Query("key") String apiKey,
             @Query("search") String query,
-            @Query("page") int page, // Add page parameter
-            @Query("page_size") int pageSize // Add page size parameter
+            @Query("page") int page,
+            @Query("page_size") int pageSize,
+            @Query("ordering") String ordering // Add ordering query parameter
     );
 
     @GET("games/{id}")

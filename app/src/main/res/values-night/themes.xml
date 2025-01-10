@@ -1,4 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-
+    <style name="Theme.GameInfoApp" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="backgroundColor">@color/background_color</item>
+        <item name="textColor">@color/white</item>
+        <item name="secondaryTextColor">@color/grey</item>
+        <item name="cardBackgroundColor">@color/card_dark</item>
+    </style>
 </resources>

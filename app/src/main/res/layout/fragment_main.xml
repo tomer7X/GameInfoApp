@@ -30,8 +30,6 @@
             android:thumb="@drawable/thumb"
             app:track="@drawable/track"
             android:contentDescription="Dark Mode Toggle" />
-
-
     </LinearLayout>
 
     <!-- Search and Filter Row -->
@@ -48,26 +46,29 @@
             android:id="@+id/search_view"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="15"
+            android:minWidth="0dp"
             android:queryHint="Search games" />
 
-        <!-- Filter Button -->
-        <Button
-            android:id="@+id/btn_filter"
+        <!-- Sort Spinner -->
+        <Spinner
+            android:id="@+id/spinner_sort"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:text="Filter"
-            android:textColor="#FFFFFF"
-            android:textStyle="bold"
-            android:background="@drawable/button_filter_background"
-            android:elevation="4dp"
-            android:drawableStart="@drawable/ic_filter"
-            android:drawablePadding="8dp"
-            android:layout_marginStart="8dp" />
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp" />
+
+        <!-- Filter Button -->
+        <ImageView
+            android:id="@+id/btn_filter"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_filter"
+            android:contentDescription="Filter Button"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginStart="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless" />
     </LinearLayout>
 
     <!-- RecyclerView for Game List -->
