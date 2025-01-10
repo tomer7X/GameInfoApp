@@ -42,6 +42,7 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
     implementation("com.google.android.material:material:1.9.0")
+    implementation("com.google.android.exoplayer:exoplayer:2.19.1")
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)

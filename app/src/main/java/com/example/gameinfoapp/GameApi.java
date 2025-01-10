@@ -6,14 +6,6 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface GameApi {
-    @GET("games")
-    Call<GameResponse> getGames(
-            @Query("key") String apiKey,
-            @Query("search") String query,
-            @Query("page") int page,
-            @Query("page_size") int pageSize,
-            @Query("ordering") String ordering // Add ordering query parameter
-    );
 
     @GET("games/{id}")
     Call<GameDetail> getGameDetails(
@@ -21,4 +13,28 @@ public interface GameApi {
             @Query("key") String apiKey
     );
 
+    @GET("games/{id}/movies")
+    Call<GameMovieResponse> getGameMovies(
+            @Path("id") String gameId,
+            @Query("key") String apiKey
+    );
+
+    @GET("games")
+    Call<GameResponse> getGames(
+            @Query("key") String apiKey,
+            @Query("search") String query,
+            @Query("page") int page,
+            @Query("page_size") int pageSize,
+            @Query("ordering") String ordering,
+            @Query("dates") String dates
+    );
+
+    @GET("genres")
+    Call<GenreResponse> getGenres(@Query("key") String apiKey);
+
+    @GET("platforms")
+    Call<PlatformResponse> getPlatforms(@Query("key") String apiKey);
+
+    @GET("publishers")
+    Call<CompanyResponse> getCompanies(@Query("key") String apiKey);
 }

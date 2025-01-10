@@ -1,5 +1,4 @@
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp">
@@ -9,61 +8,106 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Genre Spinner -->
+        <!-- Rating Range Slider -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/genre"
-            android:textSize="16sp"
+            android:text="Rating"
+            android:textSize="18sp"
             android:layout_marginBottom="8dp" />
 
-        <Spinner
-            android:id="@+id/spinner_genre"
+        <com.google.android.material.slider.RangeSlider
+            android:id="@+id/slider_rating"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:valueFrom="0"
+            android:valueTo="5"
+            android:stepSize="0.1"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Released Year Range Slider -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Released Year"
+            android:textSize="18sp"
+            android:layout_marginBottom="8dp" />
+
+        <com.google.android.material.slider.RangeSlider
+            android:id="@+id/slider_released_year"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:valueFrom="1970"
+            android:valueTo="2025"
+            android:stepSize="1"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Platforms Multiple Choice -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Platforms"
+            android:textSize="18sp"
+            android:layout_marginBottom="8dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_platforms"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp" />
 
-        <!-- Platform Spinner -->
+        <!-- Genre Multiple Choice -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/platform"
-            android:textSize="16sp"
+            android:text="Genre"
+            android:textSize="18sp"
             android:layout_marginBottom="8dp" />
 
-        <Spinner
-            android:id="@+id/spinner_platform"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_genres"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp" />
 
-        <!-- Year Picker -->
+        <!-- Company Multiple Choice -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/year"
-            android:textSize="16sp"
+            android:text="Company"
+            android:textSize="18sp"
             android:layout_marginBottom="8dp" />
 
-        <EditText
-            android:id="@+id/edit_text_year"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_companies"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/enteryear"
-            android:inputType="number" />
+            android:layout_marginBottom="16dp" />
 
-        <!-- Apply Button -->
-        <Button
-            android:id="@+id/btn_apply"
+        <!-- Buttons -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/apply"
-            android:layout_marginTop="16dp" />
-        <Button
-            android:id="@+id/btn_reset"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/reset"
-            android:layout_marginTop="16dp" />
+            android:orientation="horizontal"
+            android:gravity="end">
+
+            <Button
+                android:id="@+id/btn_reset"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Reset"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/grey"
+                android:textColor="@android:color/white" />
+
+            <Button
+                android:id="@+id/btn_apply"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Apply"
+                android:backgroundTint="@color/lavender"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
+
     </LinearLayout>
 </ScrollView>

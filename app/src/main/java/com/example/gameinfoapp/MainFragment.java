@@ -36,6 +36,7 @@ import retrofit2.Retrofit;
 
 public class MainFragment extends Fragment {
 
+    private Bundle bundle;
     private RecyclerView recyclerView;
     private SearchView searchView;
     private String currentQuery = null; // Current search query
@@ -50,10 +51,19 @@ public class MainFragment extends Fragment {
     private int currentPage = 1;
     private boolean isLoading = false;
 
+    private String yearRange = "";
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main, container, false);
+
+        Bundle arguments = getArguments();
+        if (arguments != null) {
+            bundle = arguments;
+            yearRange = bundle.getString("yearRange", "");
+        }
+
 
         // Initialize views
         recyclerView = view.findViewById(R.id.recycler_view);
@@ -79,7 +89,7 @@ public class MainFragment extends Fragment {
         // Navigate to Filter Screen
         filterButton.setOnClickListener(v -> {
             NavController navController = Navigation.findNavController(view);
-            navController.navigate(R.id.action_main_to_filter);
+            navController.navigate(R.id.action_main_to_filter, bundle);
         });
 
         return view;
@@ -132,34 +142,33 @@ public class MainFragment extends Fragment {
         });
     }
 
+    private void loadMoreGames() {
+        isLoading = true;
+        currentPage++;
 
-    private void applyLocalSorting(List<Game> games, String ordering) {
-        if (ordering == null) return;
+        Retrofit retrofit = RetrofitClient.getRetrofitInstance();
+        GameApi gameApi = retrofit.create(GameApi.class);
 
-        games.sort((game1, game2) -> {
-            try {
-                switch (ordering) {
-                    case "-rating":
-                        return Double.compare(game2.getRating(), game1.getRating());
-                    case "rating":
-                        return Double.compare(game1.getRating(), game2.getRating());
-                    case "-released":
-                        return game2.getReleased().compareTo(game1.getReleased());
-                    case "released":
-                        return game1.getReleased().compareTo(game2.getReleased());
-                    default:
-                        return 0;
+        Call<GameResponse> call = gameApi.getGames(API_KEY, currentQuery, currentPage, PAGE_SIZE, currentOrdering, yearRange);
+        call.enqueue(new Callback<GameResponse>() {
+            @Override
+            public void onResponse(Call<GameResponse> call, Response<GameResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    gameList.addAll(response.body().getResults());
+                    adapter.notifyDataSetChanged();
                 }
-            } catch (Exception e) {
-                System.out.println("DEBUG: Error during sorting: " + e.getMessage());
-                return 0;
+                isLoading = false;
+            }
+
+            @Override
+            public void onFailure(Call<GameResponse> call, Throwable t) {
+                isLoading = false;
             }
         });
     }
 
-
-
     private void setupSortSpinner(Spinner spinner) {
+        // Add a default option for no sorting
         String[] sortOptions = {
                 "Default",
                 "Rating - High to Low",
@@ -178,7 +187,7 @@ public class MainFragment extends Fragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 switch (position) {
                     case 0: // Default
-                        currentOrdering = null;
+                        currentOrdering = null; // Clear ordering
                         break;
                     case 1: // Rating - High to Low
                         currentOrdering = "-rating";
@@ -193,12 +202,7 @@ public class MainFragment extends Fragment {
                         currentOrdering = "released";
                         break;
                 }
-
-                // Log the selected sorting option
-                logDebug("Selected sorting: " + sortOptions[position] + " (ordering: " + currentOrdering + ")");
-
-                // Fetch games with updated ordering
-                fetchGames(currentQuery, currentOrdering);
+                fetchGames(currentQuery, currentOrdering); // Fetch games with updated ordering
             }
 
             @Override
@@ -207,10 +211,6 @@ public class MainFragment extends Fragment {
             }
         });
     }
-
-
-
-
 
     private void setupSearchView() {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -232,36 +232,6 @@ public class MainFragment extends Fragment {
         });
     }
 
-
-    private void logDebug(String message) {
-        System.out.println("DEBUG: " + message);
-    }
-
-    private void logError(String message) {
-        System.err.println("ERROR: " + message);
-    }
-
-
-
-    private List<Game> filterGames(List<Game> games) {
-        List<Game> filteredGames = new ArrayList<>();
-
-        for (Game game : games) {
-            boolean hasValidReleaseDate = game.getReleased() != null && !game.getReleased().isEmpty();
-            boolean hasValidRating = game.getRating() > 0.0;
-
-            if (hasValidReleaseDate && hasValidRating) {
-                filteredGames.add(game);
-            } else {
-                System.out.println("DEBUG: Filtered out game: " + game.getName() + " | Released: " + game.getReleased() + " | Rating: " + game.getRating());
-            }
-        }
-
-        System.out.println("DEBUG: Total games after filtering: " + filteredGames.size());
-        return filteredGames;
-    }
-
-
     private void fetchGames(String query, String ordering) {
         currentPage = 1;
         isLoading = true;
@@ -269,72 +239,20 @@ public class MainFragment extends Fragment {
         Retrofit retrofit = RetrofitClient.getRetrofitInstance();
         GameApi gameApi = retrofit.create(GameApi.class);
 
-        System.out.println("DEBUG: Fetching games with query: " + query + ", ordering: " + ordering);
-
-        Call<GameResponse> call = gameApi.getGames(API_KEY, query, currentPage, PAGE_SIZE, ordering);
+        Call<GameResponse> call = gameApi.getGames(API_KEY, query, currentPage, PAGE_SIZE, ordering, yearRange);
         call.enqueue(new Callback<GameResponse>() {
             @Override
             public void onResponse(Call<GameResponse> call, Response<GameResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     gameList.clear();
-
-                    List<Game> apiResults = response.body().getResults();
-                    System.out.println("DEBUG: API returned " + apiResults.size() + " games.");
-
-                    // Filter and sort the games
-                    List<Game> filteredResults = filterGames(apiResults);
-                    applyLocalSorting(filteredResults, ordering);
-
-                    if (filteredResults.isEmpty()) {
-                        System.out.println("DEBUG: No games available after filtering.");
-                    } else {
-                        gameList.addAll(filteredResults);
-                    }
-
+                    gameList.addAll(response.body().getResults());
                     adapter.notifyDataSetChanged();
-                } else {
-                    System.out.println("DEBUG: API response unsuccessful or empty.");
                 }
                 isLoading = false;
             }
 
             @Override
             public void onFailure(Call<GameResponse> call, Throwable t) {
-                System.out.println("ERROR: Failed to fetch games: " + t.getMessage());
-                isLoading = false;
-            }
-        });
-    }
-
-
-
-
-
-    private void loadMoreGames() {
-        isLoading = true;
-        currentPage++;
-
-        Retrofit retrofit = RetrofitClient.getRetrofitInstance();
-        GameApi gameApi = retrofit.create(GameApi.class);
-
-        Call<GameResponse> call = gameApi.getGames(API_KEY, currentQuery, currentPage, PAGE_SIZE, currentOrdering);
-        call.enqueue(new Callback<GameResponse>() {
-            @Override
-            public void onResponse(Call<GameResponse> call, Response<GameResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<Game> filteredResults = filterGames(response.body().getResults());
-                    gameList.addAll(filteredResults);
-
-                    adapter.notifyDataSetChanged();
-                } else {
-                    logError("API response unsuccessful or empty.");
-                }
-                isLoading = false;
-            }
-
-            @Override
-            public void onFailure(Call<GameResponse> call, Throwable t) {
-                logError("Failed to fetch games: " + t.getMessage());
                 isLoading = false;
             }
         });

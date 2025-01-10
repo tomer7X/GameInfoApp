@@ -10,6 +10,7 @@ public class GameDetail {
     private String description_raw;
     private List<Genre> genres;
     private List<Platform> platforms;
+    private String trailer;
 
     public String getName() {
         return name;
@@ -37,6 +38,14 @@ public class GameDetail {
 
     public List<Platform> getPlatforms() {
         return platforms;
+    }
+
+    public void setTrailer(String trailer) {
+        this.trailer = trailer;
+    }
+
+    public String getTrailer() {
+        return trailer;
     }
 
     // Nested Genre class

@@ -1,10 +1,12 @@
 package com.example.gameinfoapp;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.MediaController;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,6 +14,11 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.ui.PlayerView;
+
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -21,6 +28,8 @@ import retrofit2.Retrofit;
 public class GameDetailFragment extends Fragment {
 
     private TextView textViewGameTitle, textViewReleaseDate, textViewRating, textViewDescription, textViewGenres, textViewPlatforms;
+    private PlayerView playerView;
+    private ExoPlayer player;
     private ImageView imageViewBackground;
     private final String API_KEY = "80d338883fdf4b43a0ae4829f21e0863"; // Replace with your RAWG API key
 
@@ -37,6 +46,7 @@ public class GameDetailFragment extends Fragment {
         imageViewBackground = view.findViewById(R.id.image_view_background);
         textViewPlatforms = view.findViewById(R.id.text_view_platforms);
         textViewGenres = view.findViewById(R.id.text_view_genres);
+        playerView = view.findViewById(R.id.player_view);
 
         // Retrieve the game ID from arguments
         if (getArguments() != null) {
@@ -57,7 +67,30 @@ public class GameDetailFragment extends Fragment {
             public void onResponse(Call<GameDetail> call, Response<GameDetail> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     GameDetail gameDetail = response.body();
-                    updateUI(gameDetail);
+                    Call<GameMovieResponse> callGetMovie = gameApi.getGameMovies(gameId, API_KEY);
+                    callGetMovie.enqueue(new Callback<GameMovieResponse>() {
+                        @Override
+                        public void onResponse(Call<GameMovieResponse> call, Response<GameMovieResponse> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                GameMovieResponse gameMovieResponse = response.body();
+                                List<GameMovie> gameMovieList = gameMovieResponse.getResults();
+                                if (gameMovieList != null && !gameMovieList.isEmpty()) {
+                                    GameMovie gameMovie = gameMovieList.get(0);
+                                    if (gameMovie != null) {
+                                        gameDetail.setTrailer(gameMovie.getData().getMax());
+                                    }
+                                }
+
+                                updateUI(gameDetail);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<GameMovieResponse> call, Throwable t) {
+                            updateUI(gameDetail);
+                        }
+                    });
+
                 }
             }
 
@@ -101,5 +134,21 @@ public class GameDetailFragment extends Fragment {
                 .load(gameDetail.getBackgroundImage())
                 .placeholder(R.drawable.ic_launcher_background)
                 .into(imageViewBackground);
+
+        if (gameDetail.getTrailer() != null) {
+            player = new ExoPlayer.Builder(getContext()).build();
+            playerView.setPlayer(player);
+
+            // Set the video URL
+            String videoUrl = gameDetail.getTrailer();
+            MediaItem mediaItem = MediaItem.fromUri(Uri.parse(videoUrl));
+            player.setMediaItem(mediaItem);
+
+            // Prepare and play
+            player.prepare();
+        } else {
+            playerView.setVisibility(View.GONE);
+        }
+
     }
 }
