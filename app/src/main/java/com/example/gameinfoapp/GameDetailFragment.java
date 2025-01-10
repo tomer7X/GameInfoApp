@@ -57,6 +57,24 @@ public class GameDetailFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (player != null) {
+            player.setPlayWhenReady(false); // Pause the player
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (player != null) {
+            player.release(); // Release resources
+            player = null;
+        }
+    }
+
+
     private void fetchGameDetails(String gameId) {
         Retrofit retrofit = RetrofitClient.getRetrofitInstance();
         GameApi gameApi = retrofit.create(GameApi.class);
@@ -147,6 +165,7 @@ public class GameDetailFragment extends Fragment {
             // Prepare and play
             player.prepare();
         } else {
+            textViewDescription.setText(gameDetail.getDescriptionRaw() + "\n\n\nNO TRAILER FOUND");
             playerView.setVisibility(View.GONE);
         }
 
