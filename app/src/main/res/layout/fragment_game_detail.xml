@@ -1,0 +1,48 @@
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Game Title -->
+        <TextView
+            android:id="@+id/text_view_game_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/gametitle"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Release Date -->
+        <TextView
+            android:id="@+id/text_view_release_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/releasedate"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Rating -->
+        <TextView
+            android:id="@+id/text_view_rating"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/rating"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Background Image -->
+        <ImageView
+            android:id="@+id/image_view_background"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:scaleType="centerCrop"
+            android:layout_marginBottom="16dp" />
+    </LinearLayout>
+</ScrollView>

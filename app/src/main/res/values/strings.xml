@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">GameInfoApp</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="genre">Genre</string>
+    <string name="genre2">Genre: </string>
+    <string name="apply">Apply</string>
+    <string name="reset">Reset</string>
+    <string name="gamename">Game Name</string>
+    <string name="platform">Platform</string>
+    <string name="platform2">Platform: </string>
+    <string name="year">Year</string>
+    <string name="enteryear">Enter Year</string>
+    <string name="releasedate">Release Date: </string>
+    <string name="trailer">Game Trailer</string>
+    <string name="description">Description: </string>
+    <string name="gametitle">Game Title: </string>
+    <string name="filter">Filter</string>
+    <string name="rating">Rating: </string>
+</resources>
