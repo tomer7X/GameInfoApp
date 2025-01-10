@@ -9,40 +9,68 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Game Title -->
-        <TextView
-            android:id="@+id/text_view_game_title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/gametitle"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Release Date -->
-        <TextView
-            android:id="@+id/text_view_release_date"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/releasedate"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp" />
-
-        <!-- Rating -->
-        <TextView
-            android:id="@+id/text_view_rating"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/rating"
-            android:textSize="16sp"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Background Image -->
+        <!-- Game Background Image -->
         <ImageView
             android:id="@+id/image_view_background"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:scaleType="centerCrop"
             android:layout_marginBottom="16dp" />
+
+        <!-- Game Title -->
+        <TextView
+            android:id="@+id/text_view_game_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Game Title"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Release Date -->
+        <TextView
+            android:id="@+id/text_view_release_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Release Date"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp" />
+        <TextView
+            android:id="@+id/text_view_rating"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Rating"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp" />
+        <TextView
+            android:id="@+id/text_view_genres"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Genres"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Platforms -->
+        <TextView
+            android:id="@+id/text_view_platforms"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Platforms"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp" />
+        <!-- Rating -->
+
+
+        <!-- Description -->
+        <TextView
+            android:id="@+id/text_view_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Description"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Genres -->
+
     </LinearLayout>
 </ScrollView>

@@ -1,26 +1,30 @@
 package com.example.gameinfoapp;
 
-import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
+import com.bumptech.glide.Glide;
+
 import java.util.List;
 
 public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder> {
 
-    private List<Game> gameList = new ArrayList<>();
+    private List<Game> gameList;
+    private final OnGameClickListener listener;
 
+    public interface OnGameClickListener {
+        void onGameClick(String gameId);
+    }
 
-    public GameAdapter(List<Game> gameList) {
+    public GameAdapter(List<Game> gameList, OnGameClickListener listener) {
         this.gameList = gameList;
+        this.listener = listener;
     }
 
     @NonNull
@@ -32,25 +36,20 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull GameViewHolder holder, int position) {
-        Game game = gameList.get(position); // Adjusted to hold `Game` objects instead of strings
-        holder.gameNameTextView.setText(game.getName());
+        Game game = gameList.get(position);
 
-        // Add click listener to navigate to GameDetailFragment
-        holder.itemView.setOnClickListener(v -> {
-            NavController navController = Navigation.findNavController(v);
+        // Bind game details
+        holder.gameTitleTextView.setText(game.getName());
+        holder.gameRatingTextView.setText("Rating: " + game.getRating() + "⭐");
+        holder.gameReleasedTextView.setText("Release Date: " + game.getReleased());
+        Glide.with(holder.itemView.getContext())
+                .load(game.getBackgroundImage())
+                .placeholder(R.drawable.ic_launcher_background)
+                .into(holder.gameIconImageView);
 
-            // Create a Bundle to pass game details
-            Bundle bundle = new Bundle();
-            bundle.putString("gameTitle", game.getName());
-            bundle.putString("releaseDate", game.getReleased());
-            bundle.putDouble("rating", game.getRating());
-            bundle.putString("backgroundImage", game.getBackgroundImage());
-
-            // Navigate to GameDetailFragment
-            navController.navigate(R.id.action_main_to_detail, bundle);
-        });
+        // Handle click event
+        holder.itemView.setOnClickListener(v -> listener.onGameClick(game.getId()));
     }
-
 
     @Override
     public int getItemCount() {
@@ -58,11 +57,15 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder
     }
 
     static class GameViewHolder extends RecyclerView.ViewHolder {
-        TextView gameNameTextView;
+        TextView gameTitleTextView, gameRatingTextView, gameReleasedTextView;
+        ImageView gameIconImageView;
 
         public GameViewHolder(@NonNull View itemView) {
             super(itemView);
-            gameNameTextView = itemView.findViewById(R.id.text_view_game_name);
+            gameReleasedTextView = itemView.findViewById(R.id.text_view_release_date);
+            gameTitleTextView = itemView.findViewById(R.id.text_view_game_title);
+            gameRatingTextView = itemView.findViewById(R.id.text_view_game_rating);
+            gameIconImageView = itemView.findViewById(R.id.image_view_game_icon);
         }
     }
 }

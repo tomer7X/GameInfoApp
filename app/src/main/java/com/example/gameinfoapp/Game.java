@@ -6,6 +6,8 @@ public class Game {
     private double rating;
     private String background_image;
 
+    private String id;
+
     public String getName() {
         return name;
     }
@@ -21,4 +23,9 @@ public class Game {
     public String getBackgroundImage() {
         return background_image;
     }
+
+    public String getId() { return id;
+    }
 }
+
+

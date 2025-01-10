@@ -1,5 +1,6 @@
 package com.example.gameinfoapp;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,11 +10,17 @@ import android.widget.SearchView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
+import android.view.animation.AccelerateDecelerateInterpolator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,107 +38,170 @@ public class MainFragment extends Fragment {
     private GameAdapter adapter;
     private List<Game> gameList = new ArrayList<>();
     private final String API_KEY = "80d338883fdf4b43a0ae4829f21e0863"; // Replace with your RAWG API key
+    private SwitchCompat switchMode;
 
-    private boolean isLoading = false;
-    private int currentPage = 1;
+    private int currentPage = 1; // Start from the first page
+    private boolean isLoading = false; // Prevent multiple simultaneous API calls
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_main, container, false);
 
         // Initialize views
         recyclerView = view.findViewById(R.id.recycler_view);
         searchView = view.findViewById(R.id.search_view);
         filterButton = view.findViewById(R.id.btn_filter);
+        switchMode = view.findViewById(R.id.switchMode);
 
         // Setup RecyclerView
         setupRecyclerView();
 
-        // Fetch games from the API
-        fetchGames(null, currentPage); // Null query to fetch all games
+        // Fetch games from API
+        fetchGames(null);
 
-        // Setup SearchView for searching games
+        // Setup SearchView
         setupSearchView();
 
-        // Navigate to FilterFragment when filter button is clicked
-        filterButton.setOnClickListener(v -> {
-            NavController navController = Navigation.findNavController(view);
-            navController.navigate(R.id.action_main_to_filter);
-        });
+        // Setup Dark Mode Toggle
+        setupDarkModeToggle();
 
         return view;
     }
 
+    private void setupDarkModeToggle() {
+        SharedPreferences preferences = requireContext().getSharedPreferences("settings", 0);
+        boolean isDarkMode = preferences.getBoolean("dark_mode", false);
+
+        // Set initial state
+        switchMode.setChecked(isDarkMode);
+        AppCompatDelegate.setDefaultNightMode(isDarkMode ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
+
+        // Handle toggle click
+        switchMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            // Save the new mode in preferences
+            preferences.edit().putBoolean("dark_mode", isChecked).apply();
+
+            // Set the theme
+            AppCompatDelegate.setDefaultNightMode(isChecked ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
+
+            // Add thumb animation
+            animateThumb(buttonView, isChecked);
+        });
+    }
+
+
+
     private void setupRecyclerView() {
-        adapter = new GameAdapter(gameList);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-        recyclerView.setLayoutManager(layoutManager);
+        adapter = new GameAdapter(gameList, this::navigateToDetail);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
 
-        // Add Pagination Listener
+        // Add the endless scroll listener
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
 
-                if (!isLoading && layoutManager.findLastVisibleItemPosition() == gameList.size() - 1) {
-                    // Load next page when reaching the end of the list
-                    isLoading = true;
-                    currentPage++;
-                    fetchGames(null, currentPage);
+                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                if (layoutManager != null && !isLoading) {
+                    int visibleItemCount = layoutManager.getChildCount();
+                    int totalItemCount = layoutManager.getItemCount();
+                    int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
+
+                    // Check if we've reached the end of the list
+                    if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount
+                            && firstVisibleItemPosition >= 0) {
+                        // Load more games
+                        loadMoreGames();
+                    }
                 }
             }
         });
     }
 
+    private void loadMoreGames() {
+        isLoading = true; // Prevent multiple simultaneous API calls
+        currentPage++; // Increment the page number
+
+        Retrofit retrofit = RetrofitClient.getRetrofitInstance();
+        GameApi gameApi = retrofit.create(GameApi.class);
+
+        Call<GameResponse> call = gameApi.getGames(API_KEY, null, currentPage, 40); // Next page with 40 results
+        call.enqueue(new Callback<GameResponse>() {
+            @Override
+            public void onResponse(Call<GameResponse> call, Response<GameResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    gameList.addAll(response.body().getResults()); // Append new games
+                    adapter.notifyDataSetChanged();
+                }
+                isLoading = false; // Allow further API calls
+            }
+
+            @Override
+            public void onFailure(Call<GameResponse> call, Throwable t) {
+                // Handle errors
+                isLoading = false; // Allow further API calls
+            }
+        });
+    }
     private void setupSearchView() {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                currentPage = 1; // Reset to the first page for new search
-                gameList.clear(); // Clear the existing list for new search results
-                fetchGames(query, currentPage); // Fetch games based on the search query
+                fetchGames(query);
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                return false; // Optional: You can update results in real-time
+                return false;
             }
         });
     }
 
-    private void fetchGames(String query, int page) {
+    private void fetchGames(String query) {
+        currentPage = 1; // Reset to the first page when performing a new search
+        isLoading = true;
+
         Retrofit retrofit = RetrofitClient.getRetrofitInstance();
         GameApi gameApi = retrofit.create(GameApi.class);
 
-        int pageSize = 40; // Number of games per page (maximum: 40)
-
-        Call<GameResponse> call = gameApi.getGames(API_KEY, query, page, pageSize);
+        Call<GameResponse> call = gameApi.getGames(API_KEY, query, currentPage, 40); // Fetch first page with 40 results
         call.enqueue(new Callback<GameResponse>() {
             @Override
             public void onResponse(Call<GameResponse> call, Response<GameResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    List<Game> games = response.body().getResults();
-                    updateRecyclerView(games); // Update RecyclerView with fetched games
-                } else {
-                    System.out.println("API Error: " + response.message());
+                    gameList.clear(); // Clear the existing list for new data
+                    gameList.addAll(response.body().getResults());
+                    adapter.notifyDataSetChanged();
                 }
-                isLoading = false; // Allow loading more pages
+                isLoading = false; // Allow further API calls
             }
 
             @Override
             public void onFailure(Call<GameResponse> call, Throwable t) {
-                System.out.println("Network Error: " + t.getMessage());
-                isLoading = false; // Allow retry
+                // Handle errors
+                isLoading = false;
             }
         });
     }
+    private void animateThumb(View switchWidget, boolean isChecked) {
+        ObjectAnimator animator = ObjectAnimator.ofPropertyValuesHolder(
+                switchWidget,
+                PropertyValuesHolder.ofFloat("scaleX", 1f, 1.5f, 1f),
+                PropertyValuesHolder.ofFloat("scaleY", 1f, 1.5f, 1f),
+                PropertyValuesHolder.ofFloat("rotation", 0f, isChecked ? 180f : -180f, 0f)
+        );
+        animator.setDuration(400); // Duration in milliseconds
+        animator.setInterpolator(new AccelerateDecelerateInterpolator());
+        animator.start();
+    }
 
-    private void updateRecyclerView(List<Game> games) {
-        gameList.addAll(games); // Append fetched games to the list
-        adapter.notifyDataSetChanged(); // Notify the adapter that the data has change
+    private void navigateToDetail(String gameId) {
+        NavController navController = Navigation.findNavController(requireView());
+        Bundle bundle = new Bundle();
+        bundle.putString("gameId", gameId);
+        navController.navigate(R.id.action_main_to_detail, bundle);
     }
 }

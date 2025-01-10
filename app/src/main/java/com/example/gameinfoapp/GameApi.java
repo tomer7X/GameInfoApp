@@ -2,6 +2,7 @@ package com.example.gameinfoapp;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface GameApi {
@@ -11,6 +12,12 @@ public interface GameApi {
             @Query("search") String query,
             @Query("page") int page, // Add page parameter
             @Query("page_size") int pageSize // Add page size parameter
+    );
+
+    @GET("games/{id}")
+    Call<GameDetail> getGameDetails(
+            @Path("id") String gameId,
+            @Query("key") String apiKey
     );
 
 }
