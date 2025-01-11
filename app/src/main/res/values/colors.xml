@@ -12,4 +12,8 @@
     <color name="primary_dark">#000000</color>
     <color name="text_light">#000000</color>
     <color name="text_dark">#FFFFFF</color>
+    <color name="light_background">#FFFFFF</color>
+    <color name="light_text">#000000</color>
+    <color name="dark_background">#121212</color>
+    <color name="dark_text">#FFFFFF</color>
 </resources>

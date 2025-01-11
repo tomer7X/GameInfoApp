@@ -153,7 +153,7 @@ public class FilterFragment extends Fragment {
 
     private void loadCompanies() {
         GameApi gameApi = RetrofitClient.getRetrofitInstance().create(GameApi.class);
-        gameApi.getCompanies(API_KEY).enqueue(new Callback<CompanyResponse>() {
+        gameApi.getCompanies(API_KEY,1,40).enqueue(new Callback<CompanyResponse>() {
             @Override
             public void onResponse(Call<CompanyResponse> call, Response<CompanyResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {

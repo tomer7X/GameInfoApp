@@ -46,6 +46,10 @@ public interface GameApi {
     Call<PlatformResponse> getPlatforms(@Query("key") String apiKey);
 
     @GET("publishers")
-    Call<CompanyResponse> getCompanies(@Query("key") String apiKey);
+    Call<CompanyResponse> getCompanies(
+            @Query("key") String apiKey,
+            @Query("page") int page,
+            @Query("page_size") int pageSize
+    );
 
 }

@@ -37,18 +37,23 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp">
+        android:gravity="center_vertical">
 
         <!-- Search Box -->
         <SearchView
             android:id="@+id/search_view"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="15"
+            android:layout_weight="1"
             android:minWidth="0dp"
             android:queryHint="Search games" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
 
         <!-- Sort Spinner -->
         <Spinner
@@ -56,7 +61,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp" />
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"/>
 
         <!-- Filter Button -->
         <ImageView

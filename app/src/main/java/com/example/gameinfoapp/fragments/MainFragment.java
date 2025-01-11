@@ -1,6 +1,7 @@
 package com.example.gameinfoapp.fragments;
 
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -133,12 +134,13 @@ public class MainFragment extends Fragment {
 
             // Update the filter button image
             filterButton.setImageResource(isChecked ? R.drawable.dark_ic_filter : R.drawable.ic_filter);
-
             // Optional: Add thumb animation
             animateThumb(buttonView, isChecked);
 
         });
     }
+
+
 
     private void setupRecyclerView() {
         adapter = new GameAdapter(gameList, this::navigateToDetail);
