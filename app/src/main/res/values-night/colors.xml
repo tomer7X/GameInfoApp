@@ -4,7 +4,10 @@
     <color name="white">#FFFFFF</color>
     <color name="lavender">#8692F7</color>
     <color name="grey">#AAAAAA</color>
-    <color name="card_dark">#1E1E1E</color>
     <color name="background_color">#000000</color>
     <color name="text_color">#FFFFFF</color>
+    <color name="primary_light">#FFFFFF</color>
+    <color name="primary_dark">#000000</color>
+    <color name="text_light">#000000</color>
+    <color name="text_dark">#FFFFFF</color>
 </resources>

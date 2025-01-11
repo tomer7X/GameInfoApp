@@ -25,6 +25,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.Toast;
+
+import com.example.gameinfoapp.utils.GlideCacheUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -101,6 +104,9 @@ public class MainFragment extends Fragment {
         // Navigate to Filter Screen
         filterButton.setOnClickListener(v -> {
             NavController navController = Navigation.findNavController(view);
+            GlideCacheUtils.clearDiskCache(requireContext());
+            GlideCacheUtils.clearMemoryCache(requireContext());
+            //Toast.makeText(requireContext(), "Glide cache cleared", Toast.LENGTH_SHORT).show();
             navController.navigate(R.id.action_main_to_filter, bundle);
         });
 
@@ -126,6 +132,7 @@ public class MainFragment extends Fragment {
 
             // Optional: Add thumb animation
             animateThumb(buttonView, isChecked);
+
         });
     }
 
@@ -235,10 +242,8 @@ public class MainFragment extends Fragment {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                if (newText.isEmpty()) {
-                    currentQuery = null;
-                    fetchGames(currentQuery, currentOrdering);
-                }
+                currentQuery = newText.isEmpty() ? null : newText;
+                fetchGames(currentQuery, currentOrdering);
                 return false;
             }
         });
@@ -282,10 +287,12 @@ public class MainFragment extends Fragment {
         animator.start();
     }
 
+
     private void navigateToDetail(String gameId) {
         NavController navController = Navigation.findNavController(requireView());
         Bundle bundle = new Bundle();
         bundle.putString("gameId", gameId);
+
         navController.navigate(R.id.action_main_to_detail, bundle);
     }
 }
