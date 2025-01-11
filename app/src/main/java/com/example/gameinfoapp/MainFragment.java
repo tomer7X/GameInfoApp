@@ -51,7 +51,12 @@ public class MainFragment extends Fragment {
     private int currentPage = 1;
     private boolean isLoading = false;
 
+    private String selectedGenresID = null;
+    private String selectedPlatformsID = null;
+    private String selectedCompaniesID = null;
+
     private String yearRange = "";
+
 
     @Nullable
     @Override
@@ -62,6 +67,13 @@ public class MainFragment extends Fragment {
         if (arguments != null) {
             bundle = arguments;
             yearRange = bundle.getString("yearRange", "");
+            selectedGenresID = bundle.getString("selectedGenresID","");
+            selectedPlatformsID = bundle.getString("selectedPlatformsID","");
+            selectedCompaniesID = bundle.getString("selectedCompaniesID","");
+
+            selectedCompaniesID = selectedCompaniesID.isEmpty() ? null : selectedCompaniesID;
+            selectedPlatformsID = selectedPlatformsID.isEmpty() ? null : selectedPlatformsID;
+            selectedGenresID = selectedGenresID.isEmpty() ? null : selectedGenresID;
         }
 
 
@@ -149,7 +161,7 @@ public class MainFragment extends Fragment {
         Retrofit retrofit = RetrofitClient.getRetrofitInstance();
         GameApi gameApi = retrofit.create(GameApi.class);
 
-        Call<GameResponse> call = gameApi.getGames(API_KEY, currentQuery, currentPage, PAGE_SIZE, currentOrdering, yearRange);
+        Call<GameResponse> call = gameApi.getGames(API_KEY, currentQuery, currentPage, PAGE_SIZE, currentOrdering, yearRange,selectedGenresID,selectedPlatformsID,selectedCompaniesID);
         call.enqueue(new Callback<GameResponse>() {
             @Override
             public void onResponse(Call<GameResponse> call, Response<GameResponse> response) {
@@ -239,7 +251,7 @@ public class MainFragment extends Fragment {
         Retrofit retrofit = RetrofitClient.getRetrofitInstance();
         GameApi gameApi = retrofit.create(GameApi.class);
 
-        Call<GameResponse> call = gameApi.getGames(API_KEY, query, currentPage, PAGE_SIZE, ordering, yearRange);
+        Call<GameResponse> call = gameApi.getGames(API_KEY, query, currentPage, PAGE_SIZE, ordering, yearRange,selectedGenresID,selectedPlatformsID,selectedCompaniesID);
         call.enqueue(new Callback<GameResponse>() {
             @Override
             public void onResponse(Call<GameResponse> call, Response<GameResponse> response) {

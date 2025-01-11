@@ -26,7 +26,10 @@ public interface GameApi {
             @Query("page") int page,
             @Query("page_size") int pageSize,
             @Query("ordering") String ordering,
-            @Query("dates") String dates
+            @Query("dates") String dates,
+            @Query("genres") String genres,
+            @Query("platforms") String platforms,
+            @Query("publishers") String companies
     );
 
     @GET("genres")
@@ -37,4 +40,6 @@ public interface GameApi {
 
     @GET("publishers")
     Call<CompanyResponse> getCompanies(@Query("key") String apiKey);
+
+    Call<CompanyResponse> getCompanies(@Query("key") String apiKey,@Query("page") int page,@Query("page_size") int pageSize);
 }

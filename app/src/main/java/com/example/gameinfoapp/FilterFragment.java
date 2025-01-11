@@ -17,7 +17,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.slider.RangeSlider;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -28,12 +31,28 @@ public class FilterFragment extends Fragment {
     private RangeSlider sliderReleasedYear;
     private Button btnPlatforms, btnGenres, btnCompanies, btnApply, btnReset;
 
+
+
     private List<String> selectedPlatforms = new ArrayList<>();
     private List<String> platforms = new ArrayList<>();
+    private List<Integer> platformIds = new ArrayList<>();
+    private Map<String, Integer> platformMap = new HashMap<>();
+
+
     private List<String> selectedGenres = new ArrayList<>();
     private List<String> genres = new ArrayList<>();
+    private List<Integer> genreIds = new ArrayList<>();
+    private Map<String, Integer> genreMap = new HashMap<>();
+
+
+
+
     private List<String> selectedCompanies = new ArrayList<>();
     private List<String> companies = new ArrayList<>();
+
+    private List<Integer> companyIds = new ArrayList<>();
+    private Map<String, Integer> companyMap = new HashMap<>();
+
 
     private final String API_KEY = "80d338883fdf4b43a0ae4829f21e0863";
 
@@ -69,9 +88,11 @@ public class FilterFragment extends Fragment {
 
         Bundle arguments = getArguments();
         if (arguments != null) {
+
             selectedPlatforms = arguments.getStringArrayList("selectedPlatforms");
             selectedGenres = arguments.getStringArrayList("selectedGenres");
             selectedCompanies = arguments.getStringArrayList("selectedCompanies");
+
             float min = arguments.getFloat("yearMin", 1970f);
             float max = arguments.getFloat("yearMax", 2025f);
             sliderReleasedYear.setValues(min, max);
@@ -87,8 +108,9 @@ public class FilterFragment extends Fragment {
             public void onResponse(Call<PlatformResponse> call, Response<PlatformResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<PlatformResponse.Platform> platformList = response.body().getPlatforms();
-                    platforms.clear();
+                    platformMap.clear();
                     for (PlatformResponse.Platform platform : platformList) {
+                        platformMap.put(platform.getName(), platform.getId());
                         platforms.add(platform.getName());
                     }
                 }
@@ -101,6 +123,7 @@ public class FilterFragment extends Fragment {
         });
     }
 
+
     private void loadGenres() {
         GameApi gameApi = RetrofitClient.getRetrofitInstance().create(GameApi.class);
         gameApi.getGenres(API_KEY).enqueue(new Callback<GenreResponse>() {
@@ -108,8 +131,9 @@ public class FilterFragment extends Fragment {
             public void onResponse(Call<GenreResponse> call, Response<GenreResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<GenreResponse.Genre> genreList = response.body().getGenres();
-                    genres.clear();
+                    genreMap.clear(); // Clear the map before adding new genres
                     for (GenreResponse.Genre genre : genreList) {
+                        genreMap.put(genre.getName(), genre.getId()); // Add name and ID to the map
                         genres.add(genre.getName());
                     }
                 }
@@ -129,8 +153,9 @@ public class FilterFragment extends Fragment {
             public void onResponse(Call<CompanyResponse> call, Response<CompanyResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<CompanyResponse.Company> companyList = response.body().getCompanies();
-                    companies.clear();
+                    companyMap.clear(); // Clear the map before adding new genres
                     for (CompanyResponse.Company company : companyList) {
+                        companyMap.put(company.getName(), company.getId()); // Add name and ID to the map
                         companies.add(company.getName());
                     }
                 }
@@ -142,6 +167,7 @@ public class FilterFragment extends Fragment {
             }
         });
     }
+
 
     private void showMultiChoiceDialog(String title, List<String> items, List<String> selectedItems) {
         boolean[] checkedItems = new boolean[items.size()];
@@ -170,12 +196,93 @@ public class FilterFragment extends Fragment {
         selectedCompanies.clear();
     }
 
+    private String getPlatformIdsString() {
+        // Use a Set to ensure no duplicates
+
+        // Iterate through the list of genres and retrieve their IDs from the map
+        if(selectedPlatforms.isEmpty()){
+            //stay empty list.
+        }
+        else{
+            for (String platform : platforms) {
+                if (platformMap.containsKey(platform) && selectedPlatforms.contains(platform)) {
+                    platformIds.add(platformMap.get(platform));
+                }
+            }
+        }
+
+
+        // Convert the Set of IDs to a comma-separated string
+        return platformIds.stream()
+                .map(String::valueOf) // Convert each ID to a String
+                .collect(Collectors.joining(",")); // Join with commas
+
+    }
+
+    private String getGenreIdsString() {
+        // Use a Set to ensure no duplicates
+
+        // Iterate through the list of genres and retrieve their IDs from the map
+        if(selectedGenres.isEmpty()){
+            //stay empty list.
+        }
+        else{
+            for (String genre : genres) {
+                if (genreMap.containsKey(genre) && selectedGenres.contains(genre)) {
+                    genreIds.add(genreMap.get(genre));
+                }
+            }
+        }
+
+
+        // Convert the Set of IDs to a comma-separated string
+        return genreIds.stream()
+                .map(String::valueOf) // Convert each ID to a String
+                .collect(Collectors.joining(",")); // Join with commas
+
+    }
+    private String getCompanyIdsString() {
+        // Use a Set to ensure no duplicates
+
+        // Iterate through the list of genres and retrieve their IDs from the map
+        if(selectedCompanies.isEmpty()){
+            //stay empty list.
+        }
+        else{
+            for (String company : companies) {
+                if (companyMap.containsKey(company) && selectedCompanies.contains(company)) {
+                    companyIds.add(companyMap.get(company));
+                }
+            }
+        }
+
+
+        // Convert the Set of IDs to a comma-separated string
+        return companyIds.stream()
+                .map(String::valueOf) // Convert each ID to a String
+                .collect(Collectors.joining(",")); // Join with commas
+
+    }
+
+
+
     private void applyFilters() {
         // Pass filters back to MainFragment
         Bundle bundle = new Bundle();
+        //String genres = String.join(",", selectedPlatforms);
+        //bundle.putString("selectedGenres", genres);
+
+
         bundle.putStringArrayList("selectedPlatforms", new ArrayList<>(selectedPlatforms));
         bundle.putStringArrayList("selectedGenres", new ArrayList<>(selectedGenres));
         bundle.putStringArrayList("selectedCompanies", new ArrayList<>(selectedCompanies));
+
+        bundle.putString("selectedGenresID",getGenreIdsString());
+        bundle.putString("selectedPlatformsID",getPlatformIdsString());
+        bundle.putString("selectedCompaniesID",getCompanyIdsString());
+
+
+
         String yearMin = Math.round(sliderReleasedYear.getValues().get(0)) + "-01-01";
         String yearMax = Math.round(sliderReleasedYear.getValues().get(1)) + "-12-31";
         bundle.putFloat("yearMin", Math.round(sliderReleasedYear.getValues().get(0)));
