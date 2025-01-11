@@ -1,4 +1,11 @@
-package com.example.gameinfoapp;
+package com.example.gameinfoapp.api;
+
+import com.example.gameinfoapp.responses.CompanyResponse;
+import com.example.gameinfoapp.classes.GameDetail;
+import com.example.gameinfoapp.responses.GameMovieResponse;
+import com.example.gameinfoapp.responses.GameResponse;
+import com.example.gameinfoapp.responses.GenreResponse;
+import com.example.gameinfoapp.responses.PlatformResponse;
 
 import retrofit2.Call;
 import retrofit2.http.GET;

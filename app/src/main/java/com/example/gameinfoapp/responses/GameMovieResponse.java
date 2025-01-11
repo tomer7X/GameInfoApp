@@ -1,4 +1,6 @@
-package com.example.gameinfoapp;
+package com.example.gameinfoapp.responses;
+
+import com.example.gameinfoapp.classes.GameMovie;
 
 import java.util.List;
 

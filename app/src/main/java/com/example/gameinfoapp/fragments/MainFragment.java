@@ -1,4 +1,4 @@
-package com.example.gameinfoapp;
+package com.example.gameinfoapp.fragments;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.Spinner;
@@ -25,8 +24,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.Toast;
 
+import com.example.gameinfoapp.classes.Game;
+import com.example.gameinfoapp.adapters.GameAdapter;
+import com.example.gameinfoapp.api.GameApi;
+import com.example.gameinfoapp.responses.GameResponse;
+import com.example.gameinfoapp.R;
+import com.example.gameinfoapp.api.RetrofitClient;
 import com.example.gameinfoapp.utils.GlideCacheUtils;
 
 import java.util.ArrayList;

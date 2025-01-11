@@ -5,6 +5,7 @@
     <color name="lavender">#8692F7</color>
     <color name="grey">#AAAAAA</color>
     <color name="card_light">#F5F5F5</color>
+    <color name="card_dark">#1E1E1E</color>
     <color name="background_color">#FFFFFF</color>
     <color name="text_color">#000000</color>
     <color name="primary_light">#FFFFFF</color>

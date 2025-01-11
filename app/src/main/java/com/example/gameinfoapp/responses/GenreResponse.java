@@ -1,4 +1,4 @@
-package com.example.gameinfoapp;
+package com.example.gameinfoapp.responses;
 
 import com.google.gson.annotations.SerializedName;
 

@@ -1,6 +1,4 @@
-package com.example.gameinfoapp;
-
-import java.util.List;
+package com.example.gameinfoapp.classes;
 
 public class GameMovie {
     private Data data;

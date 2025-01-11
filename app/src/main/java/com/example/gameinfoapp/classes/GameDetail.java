@@ -1,4 +1,4 @@
-package com.example.gameinfoapp;
+package com.example.gameinfoapp.classes;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.example.gameinfoapp;
+package com.example.gameinfoapp.fragments;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
@@ -12,8 +12,13 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
-import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.gameinfoapp.responses.CompanyResponse;
+import com.example.gameinfoapp.api.GameApi;
+import com.example.gameinfoapp.responses.GenreResponse;
+import com.example.gameinfoapp.responses.PlatformResponse;
+import com.example.gameinfoapp.R;
+import com.example.gameinfoapp.api.RetrofitClient;
 import com.google.android.material.slider.RangeSlider;
 
 import java.util.ArrayList;

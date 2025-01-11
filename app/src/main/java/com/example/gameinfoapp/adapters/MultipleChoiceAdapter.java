@@ -1,13 +1,14 @@
-package com.example.gameinfoapp;
+package com.example.gameinfoapp.adapters;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.gameinfoapp.R;
 
 import java.util.List;
 

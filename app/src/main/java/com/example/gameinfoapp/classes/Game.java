@@ -1,8 +1,6 @@
-package com.example.gameinfoapp;
+package com.example.gameinfoapp.classes;
 
 import java.util.List;
-
-import okhttp3.internal.platform.Platform;
 
 public class Game {
     private String name;
