@@ -1,5 +1,6 @@
 package com.example.gameinfoapp;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,13 +25,15 @@ import retrofit2.Response;
 
 public class FilterFragment extends Fragment {
 
-    private RangeSlider sliderRating, sliderReleasedYear;
-    private RecyclerView recyclerPlatforms, recyclerGenres, recyclerCompanies;
-    private Button btnApply, btnReset;
+    private RangeSlider sliderReleasedYear;
+    private Button btnPlatforms, btnGenres, btnCompanies, btnApply, btnReset;
 
     private List<String> selectedPlatforms = new ArrayList<>();
+    private List<String> platforms = new ArrayList<>();
     private List<String> selectedGenres = new ArrayList<>();
+    private List<String> genres = new ArrayList<>();
     private List<String> selectedCompanies = new ArrayList<>();
+    private List<String> companies = new ArrayList<>();
 
     private final String API_KEY = "80d338883fdf4b43a0ae4829f21e0863";
 
@@ -39,22 +42,24 @@ public class FilterFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_filter, container, false);
 
-        // Initialize views
-        sliderRating = view.findViewById(R.id.slider_rating);
         sliderReleasedYear = view.findViewById(R.id.slider_released_year);
-        recyclerPlatforms = view.findViewById(R.id.recycler_platforms);
-        recyclerGenres = view.findViewById(R.id.recycler_genres);
-        recyclerCompanies = view.findViewById(R.id.recycler_companies);
+        btnPlatforms = view.findViewById(R.id.btn_platforms);
+        btnGenres = view.findViewById(R.id.btn_genres);
+        btnCompanies = view.findViewById(R.id.btn_companies);
         btnApply = view.findViewById(R.id.btn_apply);
         btnReset = view.findViewById(R.id.btn_reset);
 
-        sliderRating.setValues(0f, 5f);
         sliderReleasedYear.setValues(1970f, 2025f);
 
         // Load filter data
         loadPlatforms();
         loadGenres();
         loadCompanies();
+
+
+        btnPlatforms.setOnClickListener(v -> showMultiChoiceDialog("Select Platforms", platforms, selectedPlatforms));
+        btnGenres.setOnClickListener(v -> showMultiChoiceDialog("Select Genres", genres, selectedGenres));
+        btnCompanies.setOnClickListener(v -> showMultiChoiceDialog("Select Companies", companies, selectedCompanies));
 
         // Reset button functionality
         btnReset.setOnClickListener(v -> resetFilters());
@@ -64,6 +69,9 @@ public class FilterFragment extends Fragment {
 
         Bundle arguments = getArguments();
         if (arguments != null) {
+            selectedPlatforms = arguments.getStringArrayList("selectedPlatforms");
+            selectedGenres = arguments.getStringArrayList("selectedGenres");
+            selectedCompanies = arguments.getStringArrayList("selectedCompanies");
             float min = arguments.getFloat("yearMin", 1970f);
             float max = arguments.getFloat("yearMax", 2025f);
             sliderReleasedYear.setValues(min, max);
@@ -78,12 +86,11 @@ public class FilterFragment extends Fragment {
             @Override
             public void onResponse(Call<PlatformResponse> call, Response<PlatformResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    List<PlatformResponse.Platform> platforms = response.body().getPlatforms();
-                    List<String> platformNames = new ArrayList<>();
-                    for (PlatformResponse.Platform platform : platforms) {
-                        platformNames.add(platform.getName());
+                    List<PlatformResponse.Platform> platformList = response.body().getPlatforms();
+                    platforms.clear();
+                    for (PlatformResponse.Platform platform : platformList) {
+                        platforms.add(platform.getName());
                     }
-                    setupRecyclerView(recyclerPlatforms, platformNames, selectedPlatforms);
                 }
             }
 
@@ -100,12 +107,11 @@ public class FilterFragment extends Fragment {
             @Override
             public void onResponse(Call<GenreResponse> call, Response<GenreResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    List<GenreResponse.Genre> genres = response.body().getGenres();
-                    List<String> genreNames = new ArrayList<>();
-                    for (GenreResponse.Genre genre : genres) {
-                        genreNames.add(genre.getName());
+                    List<GenreResponse.Genre> genreList = response.body().getGenres();
+                    genres.clear();
+                    for (GenreResponse.Genre genre : genreList) {
+                        genres.add(genre.getName());
                     }
-                    setupRecyclerView(recyclerGenres, genreNames, selectedGenres);
                 }
             }
 
@@ -122,12 +128,11 @@ public class FilterFragment extends Fragment {
             @Override
             public void onResponse(Call<CompanyResponse> call, Response<CompanyResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    List<CompanyResponse.Company> companies = response.body().getCompanies();
-                    List<String> companyNames = new ArrayList<>();
-                    for (CompanyResponse.Company company : companies) {
-                        companyNames.add(company.getName());
+                    List<CompanyResponse.Company> companyList = response.body().getCompanies();
+                    companies.clear();
+                    for (CompanyResponse.Company company : companyList) {
+                        companies.add(company.getName());
                     }
-                    setupRecyclerView(recyclerCompanies, companyNames, selectedCompanies);
                 }
             }
 
@@ -138,20 +143,31 @@ public class FilterFragment extends Fragment {
         });
     }
 
-    private void setupRecyclerView(RecyclerView recyclerView, List<String> items, List<String> selectedItems) {
-        MultipleChoiceAdapter adapter = new MultipleChoiceAdapter(items, selectedItems);
-        recyclerView.setAdapter(adapter);
+    private void showMultiChoiceDialog(String title, List<String> items, List<String> selectedItems) {
+        boolean[] checkedItems = new boolean[items.size()];
+        for (int i = 0; i < items.size(); i++) {
+            checkedItems[i] = selectedItems.contains(items.get(i));
+        }
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle(title)
+                .setMultiChoiceItems(items.toArray(new String[0]), checkedItems, (dialog, which, isChecked) -> {
+                    if (isChecked) {
+                        selectedItems.add(items.get(which));
+                    } else {
+                        selectedItems.remove(items.get(which));
+                    }
+                })
+                .setPositiveButton("OK", null)
+                .show();
     }
 
+
     private void resetFilters() {
-        sliderRating.setValues(0f, 5f);
         sliderReleasedYear.setValues(1970f, 2025f);
         selectedPlatforms.clear();
         selectedGenres.clear();
         selectedCompanies.clear();
-        recyclerPlatforms.getAdapter().notifyDataSetChanged();
-        recyclerGenres.getAdapter().notifyDataSetChanged();
-        recyclerCompanies.getAdapter().notifyDataSetChanged();
     }
 
     private void applyFilters() {
@@ -160,8 +176,6 @@ public class FilterFragment extends Fragment {
         bundle.putStringArrayList("selectedPlatforms", new ArrayList<>(selectedPlatforms));
         bundle.putStringArrayList("selectedGenres", new ArrayList<>(selectedGenres));
         bundle.putStringArrayList("selectedCompanies", new ArrayList<>(selectedCompanies));
-        bundle.putFloat("ratingMin", sliderRating.getValues().get(0));
-        bundle.putFloat("ratingMax", sliderRating.getValues().get(1));
         String yearMin = Math.round(sliderReleasedYear.getValues().get(0)) + "-01-01";
         String yearMax = Math.round(sliderReleasedYear.getValues().get(1)) + "-12-31";
         bundle.putFloat("yearMin", Math.round(sliderReleasedYear.getValues().get(0)));

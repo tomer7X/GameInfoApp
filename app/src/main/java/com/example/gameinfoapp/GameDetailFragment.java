@@ -27,7 +27,7 @@ import retrofit2.Retrofit;
 
 public class GameDetailFragment extends Fragment {
 
-    private TextView textViewGameTitle, textViewReleaseDate, textViewRating, textViewDescription, textViewGenres, textViewPlatforms;
+    private TextView textViewGameTitle, textViewReleaseDate, textViewRating, textViewDescription, textViewGenres, textViewPlatforms, textViewPublishers, textViewDeveloeprs;
     private PlayerView playerView;
     private ExoPlayer player;
     private ImageView imageViewBackground;
@@ -46,6 +46,9 @@ public class GameDetailFragment extends Fragment {
         imageViewBackground = view.findViewById(R.id.image_view_background);
         textViewPlatforms = view.findViewById(R.id.text_view_platforms);
         textViewGenres = view.findViewById(R.id.text_view_genres);
+        textViewPublishers = view.findViewById(R.id.text_view_publishers);
+        textViewDeveloeprs = view.findViewById(R.id.text_view_developers);
+
         playerView = view.findViewById(R.id.player_view);
 
         // Retrieve the game ID from arguments
@@ -125,6 +128,10 @@ public class GameDetailFragment extends Fragment {
         textViewRating.setText("Rating: " + gameDetail.getRating() + "⭐");
         textViewDescription.setText(gameDetail.getDescriptionRaw());
 
+
+        textViewDeveloeprs.setText("Developers: " + gameDetail.getDevelopers());
+        textViewPublishers.setText("Publishers: " + gameDetail.getPublishers());
+
         // Extract platform names
         if (gameDetail.getPlatforms() != null && !gameDetail.getPlatforms().isEmpty()) {
             StringBuilder platforms = new StringBuilder();
@@ -146,6 +153,30 @@ public class GameDetailFragment extends Fragment {
         } else {
             textViewGenres.setText("Genres: Not Available");
         }
+
+        // Extract Developers names
+        if (gameDetail.getDevelopers() != null && !gameDetail.getDevelopers().isEmpty()) {
+            StringBuilder developers = new StringBuilder();
+            for (GameDetail.Developer developer : gameDetail.getDevelopers()) {
+                developers.append(developer.getName()).append(", ");
+            }
+            textViewDeveloeprs.setText("Developers: " + developers.toString().replaceAll(", $", ""));
+        } else {
+            textViewDeveloeprs.setText("Developers: Not Available");
+        }
+
+        // Extract Publishers names
+        if (gameDetail.getPublishers() != null && !gameDetail.getPublishers().isEmpty()) {
+            StringBuilder publishers = new StringBuilder();
+            for (GameDetail.Publisher publisher : gameDetail.getPublishers()) {
+                publishers.append(publisher.getName()).append(", ");
+            }
+            textViewPublishers.setText("Publishers: " + publishers.toString().replaceAll(", $", ""));
+        } else {
+            textViewPublishers.setText("Publishers: Not Available");
+        }
+
+
 
         // Load the background image using Glide
         Glide.with(this)

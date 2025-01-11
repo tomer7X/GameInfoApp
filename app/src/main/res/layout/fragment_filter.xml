@@ -8,23 +8,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Rating Range Slider -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Rating"
-            android:textSize="18sp"
-            android:layout_marginBottom="8dp" />
-
-        <com.google.android.material.slider.RangeSlider
-            android:id="@+id/slider_rating"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:valueFrom="0"
-            android:valueTo="5"
-            android:stepSize="0.1"
-            android:layout_marginBottom="16dp" />
-
         <!-- Released Year Range Slider -->
         <TextView
             android:layout_width="wrap_content"
@@ -42,46 +25,28 @@
             android:stepSize="1"
             android:layout_marginBottom="16dp" />
 
-        <!-- Platforms Multiple Choice -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Platforms"
-            android:textSize="18sp"
-            android:layout_marginBottom="8dp" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_platforms"
+        <!-- Platforms Multi-Choice Button -->
+        <Button
+            android:id="@+id/btn_platforms"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:text="Select Platforms"
             android:layout_marginBottom="16dp" />
 
-        <!-- Genre Multiple Choice -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Genre"
-            android:textSize="18sp"
-            android:layout_marginBottom="8dp" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_genres"
+        <!-- Genre Multi-Choice Button -->
+        <Button
+            android:id="@+id/btn_genres"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:text="Select Genres"
             android:layout_marginBottom="16dp" />
 
-        <!-- Company Multiple Choice -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Company"
-            android:textSize="18sp"
-            android:layout_marginBottom="8dp" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_companies"
+        <!-- Company Multi-Choice Button -->
+        <Button
+            android:id="@+id/btn_companies"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:text="Select Companies"
             android:layout_marginBottom="16dp" />
 
         <!-- Buttons -->

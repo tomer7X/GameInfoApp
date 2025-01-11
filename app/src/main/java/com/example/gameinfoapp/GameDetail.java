@@ -10,7 +10,11 @@ public class GameDetail {
     private String description_raw;
     private List<Genre> genres;
     private List<Platform> platforms;
+
+    private List<Developer> developers;
+    private List<Publisher> publishers;
     private String trailer;
+
 
     public String getName() {
         return name;
@@ -48,8 +52,31 @@ public class GameDetail {
         return trailer;
     }
 
+    public List<Developer> getDevelopers() {
+        return developers;
+    }
+
+    public List<Publisher> getPublishers() {
+        return publishers;
+    }
+
+
     // Nested Genre class
     public static class Genre {
+        private String name;
+
+        public String getName() {
+            return name;
+        }
+    }
+    public static class Publisher {
+        private String name;
+
+        public String getName() {
+            return name;
+        }
+    }
+    public static class Developer {
         private String name;
 
         public String getName() {
@@ -73,4 +100,36 @@ public class GameDetail {
             }
         }
     }
+
+//    public static class Publisher {
+//        private PublisherDetail publisher;
+//
+//        public PublisherDetail getPublisher() {
+//            return publisher;
+//        }
+//
+//        public static class PublisherDetail {
+//            private String name;
+//
+//            public String getName() {
+//                return name;
+//            }
+//        }
+//    }
+//
+//    public static class Developer {
+//        private DeveloperDetail developer;
+//
+//        public DeveloperDetail getDeveloper() {
+//            return developer;
+//        }
+//
+//        public static class DeveloperDetail {
+//            private String name;
+//
+//            public String getName() {
+//                return name;
+//            }
+//        }
+//    }
 }

@@ -49,6 +49,21 @@
             android:text="Genres"
             android:textSize="16sp"
             android:layout_marginBottom="8dp" />
+        <TextView
+            android:id="@+id/text_view_publishers"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Publishers"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp" />
+        <TextView
+            android:id="@+id/text_view_developers"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Developers"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp" />
+
 
         <!-- Platforms -->
         <TextView
